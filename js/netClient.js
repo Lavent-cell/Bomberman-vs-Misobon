@@ -11,6 +11,7 @@ import { renderAll, renderBoard, setLaserGauge, resetLaserGauge } from "./render
 import { emitEvent } from "./events.js";
 import { uiHooks, btnGameStart, loadingMsgEl, startOverlay, countdownEl, selSdStage } from "./dom.js";
 import { clock } from "./clock.js";
+import { audioManager } from "./audio.js";
 
 const SESSION_STORAGE_KEY = "bombervsmisobon_net_token";
 const SPECTATE_STORAGE_KEY = "bombervsmisobon_net_spectate"; // 観戦のまま再接続するための記憶
@@ -395,6 +396,7 @@ class NetClient {
     inviteBar.style.cssText = "display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:8px; font-size:12px; color:#ffd700;";
     inviteBar.innerHTML = `
       <span id="room-status-text">部屋: [${this.roomId}]</span>
+      <button type="button" id="btn-enable-audio" style="padding:3px 10px; font-size:11px; background:#245d36; color:#fff; border:1px solid #79c894; border-radius:4px; cursor:pointer;">🔊 音声を有効にする</button>
       <button type="button" id="btn-copy-invite" style="padding:3px 10px; font-size:11px; background:#333; color:#eee; border:1px solid #666; border-radius:4px; cursor:pointer;">招待URLをコピー</button>
       <button type="button" id="btn-copy-spectate" style="padding:3px 10px; font-size:11px; background:#333; color:#eee; border:1px solid #666; border-radius:4px; cursor:pointer;">観戦用URLをコピー</button>
       <button type="button" id="btn-spectate" style="display:none; padding:3px 10px; font-size:11px; background:#333; color:#eee; border:1px solid #666; border-radius:4px; cursor:pointer;">観戦にまわる(枠から降りる)</button>
@@ -413,6 +415,23 @@ class NetClient {
     `;
     document.body.insertBefore(inviteBar, document.body.firstChild);
 
+    // ブラウザの自動再生制限に対応: 各端末で本人のクリック/タップからAudioContextを開始する。
+    // ホストのGAME STARTだけでは、参加者・観戦者の音声は初期化されない。
+    const audioBtn = document.getElementById("btn-enable-audio");
+    audioBtn.addEventListener("click", async () => {
+      audioBtn.disabled = true;
+      audioBtn.textContent = "音声を準備中…";
+      try {
+        await audioManager.init();
+        // 試合開始後の参加や途中での音声有効化にも対応。
+        if (game.gameStarted && !game.over && audioManager.bgmSources.length === 0) audioManager.play();
+        audioBtn.textContent = "🔊 音声ON";
+      } catch (err) {
+        console.error("[音声初期化]", err);
+        audioBtn.disabled = false;
+        audioBtn.textContent = "🔊 音声を再試行";
+      }
+    });
     const copyMsg = document.getElementById("copy-msg");
     document.getElementById("btn-copy-invite").addEventListener("click", () => {
       try {
