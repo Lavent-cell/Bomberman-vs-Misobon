@@ -939,3 +939,12 @@ body:not(.match-live) .entity.selected:not(.dead)::before {
 
 /* Public build: hide benchmark controls without removing DOM bindings. */
 .score-row[hidden] { display: none !important; }
+
+/* 公開版: 重要な参加・音声操作を関連する設定のそばに配置 */
+.roster-slot-row { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+#spectate-button-mount { display: flex; align-items: center; min-height: 48px; }
+#btn-spectate { font: bold 12px sans-serif; padding: 8px 10px; color: #eee; background: #343434; border: 2px solid #777; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+#btn-spectate:hover { border-color: #ffd700; }
+#audio-button-mount { margin: 3px 0 6px; }
+#btn-enable-audio { font: bold 12px sans-serif; padding: 7px 12px; background: #245d36; color: #fff; border: 2px solid #79c894; border-radius: 6px; cursor: pointer; }
+#btn-enable-audio:disabled { opacity: 0.75; cursor: default; }
