@@ -415,6 +415,14 @@ class NetClient {
     `;
     document.body.insertBefore(inviteBar, document.body.firstChild);
 
+    // 操作に関わるボタンは設定パネル内へ移動。既存のIDとイベント処理は維持する。
+    const audioMount = document.getElementById("audio-button-mount");
+    const spectateMount = document.getElementById("spectate-button-mount");
+    const audioControl = document.getElementById("btn-enable-audio");
+    const spectateControl = document.getElementById("btn-spectate");
+    if (audioMount && audioControl) { audioMount.appendChild(audioControl); audioControl.removeAttribute("style"); }
+    if (spectateMount && spectateControl) { spectateMount.appendChild(spectateControl); spectateControl.removeAttribute("style"); spectateControl.style.display = "none"; }
+
     // ブラウザの自動再生制限に対応: 各端末で本人のクリック/タップからAudioContextを開始する。
     // ホストのGAME STARTだけでは、参加者・観戦者の音声は初期化されない。
     const audioBtn = document.getElementById("btn-enable-audio");
