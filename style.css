@@ -1,0 +1,941 @@
+body {
+  margin: 0;
+  background: #111;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: auto;
+  font-family: sans-serif;
+  padding: 10px 0;
+  box-sizing: border-box;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ---- サドンデス警告バナー ----
+   画面最上部に常時表示し、残り秒数と現在の段階を大きく見せる。
+   残り5秒を切ると赤く点滅して緊張感を出す(js/suddenDeath.js がクラスを付け替える)。 */
+.sudden-death-banner {
+  font-size: 20px;
+  font-weight: 900;
+  color: #ffd700;
+  background: #1b1b1b;
+  border: 2px solid #444;
+  border-radius: 8px;
+  padding: 8px 20px;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  text-align: center;
+}
+.sudden-death-banner.warning {
+  color: #fff;
+  background: #7a0000;
+  border-color: #ff1744;
+  animation: sdd-banner-pulse 0.5s ease-in-out infinite alternate;
+}
+@keyframes sdd-banner-pulse {
+  from { box-shadow: 0 0 6px 2px rgba(255, 23, 68, 0.5); }
+  to { box-shadow: 0 0 20px 8px rgba(255, 23, 68, 0.95); }
+}
+
+/* ---- キャラクター設定パネル ---- */
+.roster-panel {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 10px;
+  background: #181818;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 8px 12px;
+  max-width: 96vw;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.roster-team {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.roster-team-header {
+  font-size: 12px;
+  font-weight: bold;
+  color: #bbb;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.team-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+}
+.bm-badge { background: #00b0ff; }
+.mb-badge { background: #d50000; }
+
+.slot-list {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.slot-card {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #242424;
+  border: 2px solid #3a3a3a;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.slot-card:hover {
+  background: #2e2e2e;
+  border-color: #666;
+}
+.slot-card.active-control {
+  border-color: #ffd700;
+  background: #2a2818;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+}
+.slot-card.status-dead {
+  opacity: 0.45;
+  filter: grayscale(0.8);
+}
+.slot-card.status-off {
+  opacity: 0.3;
+}
+
+.slot-icon-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: #fff;
+  flex-shrink: 0;
+}
+.slot-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.slot-name {
+  font-size: 11px;
+  font-weight: bold;
+  color: #eee;
+  white-space: nowrap;
+}
+.slot-select {
+  font-size: 11px;
+  background: #151515;
+  color: #ddd;
+  border: 1px solid #444;
+  border-radius: 3px;
+  padding: 1px 2px;
+  cursor: pointer;
+}
+.slot-select:focus {
+  outline: none;
+  border-color: #ffd700;
+}
+.slot-active-tag {
+  font-size: 9px;
+  color: #ffd700;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.controls {
+  margin-bottom: 8px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.controls button {
+  padding: 6px 14px;
+  font-size: 13px;
+  border: 2px solid #555;
+  border-radius: 6px;
+  background: #222;
+  color: #ccc;
+  cursor: pointer;
+}
+.controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.control-hint {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.volume-controls {
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 14px;
+  background: #1b1b1b;
+  border: 1px solid #333;
+  border-radius: 6px;
+  width: 320px;
+}
+.volume-hint {
+  margin: 0;
+  font-size: 11px;
+  color: #888;
+}
+.volume-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.volume-name {
+  width: 100px;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.volume-name-master { color: #ffd700; }
+.volume-name-bgm { color: #64b5f6; }
+.volume-name-sfx { color: #81c784; }
+.volume-row input[type="range"] { flex: 1; }
+#vol-master { accent-color: #ffd700; }
+#vol-bgm { accent-color: #64b5f6; }
+#vol-sfx { accent-color: #81c784; }
+.volume-value {
+  width: 2.5em;
+  text-align: right;
+  color: #eee;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+
+.status {
+  min-height: 20px;
+  margin-bottom: 6px;
+  color: #ffd700;
+  font-size: 13px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* ---- フィールド ---- */
+.field {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(15, 32px);
+  grid-template-rows: repeat(13, 32px);
+}
+.cell {
+  width: 32px;
+  height: 32px;
+  box-sizing: border-box;
+  transition: background-color 0.3s ease;
+  /* マス同士が色でベタッとくっついて見えないよう、全マス共通で1マス単位の
+     薄い輪郭を入れる(壁・床問わず)。 */
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+.floor { background: #2f8f2f; }
+/* 柱(内壁)・サドンデスで壁化したマス(旧輪郭・新輪郭とも)は全て .wall で
+   統一し、レンガ調のテクスチャ+くっきりした輪郭で1マスずつ視認できるようにする。
+   クラスの付け替えは suddenDeath.js で行う。 */
+.wall {
+  background-color: #8a8a8a;
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.32) 0 2px, transparent 2px 16px, rgba(0, 0, 0, 0.32) 16px 18px, transparent 18px 32px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.32) 0 2px, transparent 2px 16px, rgba(0, 0, 0, 0.32) 16px 18px, transparent 18px 32px),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.08));
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.55), inset 0 0 0 3px rgba(255, 255, 255, 0.07);
+}
+.cell.cracked {
+  background: repeating-linear-gradient(135deg, #b0873f, #b0873f 4px, #7a5a26 4px, #7a5a26 8px);
+  box-shadow: inset 0 0 0 2px #5a4014;
+}
+.cell.wall-broken {
+  background: repeating-linear-gradient(45deg, #4a3b2a, #4a3b2a 6px, #241c12 6px, #241c12 12px);
+  box-shadow: inset 0 0 0 2px #150f08;
+}
+
+/* ---- キャラクター エンティティ ---- */
+.entity {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  transition: left 0.15s linear, top 0.15s linear;
+  box-sizing: border-box;
+  z-index: 4;
+}
+
+/* ボンバーマン（丸型ベース + ポンポン + バイザー + 番号） */
+.bomberman {
+  border-radius: 50%;
+  background: var(--char-color, #ffffff);
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.25), inset 2px 2px 0 rgba(255, 255, 255, 0.4);
+  transform: translate(4px, 4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bomberman .char-pom {
+  position: absolute;
+  top: -4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--char-accent, #00e5ff);
+  box-shadow: 0 0 3px rgba(0,0,0,0.5);
+}
+.bomberman .char-visor {
+  position: absolute;
+  top: 5px;
+  width: 14px;
+  height: 7px;
+  border-radius: 3px;
+  background: var(--char-visor, #263238);
+}
+/* みそボン（角丸正方形 + モンスターツノ + 鋭い目 + 番号） */
+.misobon {
+  border-radius: 5px;
+  background: var(--char-color, #d50000);
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.3), inset 2px 2px 0 rgba(255, 255, 255, 0.25);
+  transform: translate(4px, 4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.misobon .char-horn-l, .misobon .char-horn-r {
+  position: absolute;
+  top: -4px;
+  width: 4px;
+  height: 5px;
+  background: var(--char-horn, #ff8a80);
+  border-radius: 2px 2px 0 0;
+}
+.misobon .char-horn-l { left: 3px; transform: rotate(-15deg); }
+.misobon .char-horn-r { right: 3px; transform: rotate(15deg); }
+.misobon .char-eyes {
+  position: absolute;
+  top: 6px;
+  display: flex;
+  gap: 4px;
+}
+.misobon .char-eye {
+  width: 3px;
+  height: 4px;
+  background: var(--char-eye, #ffffff);
+  border-radius: 1px;
+  box-shadow: 0 0 2px var(--char-eye, #fff);
+}
+/* プレイヤー操作中フォーカス */
+.entity.selected {
+  box-shadow: 0 0 0 3px #ffd700, 0 0 12px #ffd700 !important;
+  z-index: 10;
+}
+
+/* 死亡状態 */
+.entity.dead {
+  opacity: 0.25;
+  filter: grayscale(1);
+}
+.entity.dead::after {
+  content: "✕";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: #ff1744;
+  text-shadow: 0 0 4px #000;
+}
+
+/* 不参加 (OFF) */
+.entity.off-duty {
+  display: none !important;
+}
+
+.misobon.jumping {
+  z-index: 8;
+}
+
+/* ---- 爆弾・爆風 ---- */
+.bomb {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #1a1a1a;
+  border: 2px solid #333;
+  border-radius: 50%;
+  transform: translate(9px, 9px);
+  pointer-events: none;
+  z-index: 3;
+}
+.bomb::before {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 4px;
+  background: #ff6600;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.explosion-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 160, 0, 0.95) 0%, rgba(230, 60, 0, 0.7) 100%);
+  animation: explode 0.6s ease-out;
+  pointer-events: none;
+  z-index: 5;
+}
+@keyframes explode {
+  0% { opacity: 1; transform: scale(0); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+/* ---- ゲーム開始オーバーレイ ----
+   盤面全体を暗転させるのはやめ、ボタン部分だけの小さいパネルにする。
+   操作ロック自体はJS側(game.gameStarted)で行っているため、暗転で
+   盤面を隠す必要はなく、むしろ開始直後に状況を見誤る原因になるため。 */
+.start-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 30;
+  pointer-events: none;
+}
+.start-overlay.hidden { display: none; }
+.start-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 2px solid #ffd700;
+  border-radius: 12px;
+  padding: 18px 28px;
+  pointer-events: auto;
+}
+.start-overlay button {
+  padding: 14px 32px;
+  font-size: 18px;
+  font-weight: bold;
+  border: 2px solid #ffd700;
+  border-radius: 8px;
+  background: #b71c1c;
+  color: #fff;
+  cursor: pointer;
+}
+.start-overlay button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.start-overlay p {
+  color: #ffd700;
+  font-size: 14px;
+  margin: 0;
+}
+
+.countdown {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 72px;
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
+  z-index: 25;
+  pointer-events: none;
+}
+.countdown.hidden { display: none; }
+
+/* ---- チャージショット ---- */
+.bomberman.charging {
+  box-shadow: 0 0 10px 6px rgba(79, 195, 247, 0.75);
+  animation: bomberman-charge-pulse 0.55s ease-in-out infinite alternate;
+}
+.bomberman.selected.charging {
+  box-shadow: 0 0 0 3px #ffd700, 0 0 14px 7px rgba(79, 195, 247, 0.85);
+}
+.bomberman.charging.charge-ready {
+  animation: bomberman-charge-pulse 0.28s ease-in-out infinite alternate;
+}
+.bomberman.selected.charging.charge-ready {
+  box-shadow: 0 0 0 3px #ffd700, 0 0 20px 10px rgba(140, 225, 255, 0.95);
+}
+.bomberman.charging.charge-stage-2 {
+  box-shadow: 0 0 14px 8px rgba(129, 230, 255, 0.95), 0 0 26px 12px rgba(79, 195, 247, 0.7);
+  animation: bomberman-charge-stage-2-pulse 0.2s ease-in-out infinite alternate;
+}
+.bomberman.selected.charging.charge-stage-2 {
+  box-shadow: 0 0 0 3px #ffd700, 0 0 18px 10px rgba(224, 250, 255, 1), 0 0 30px 14px rgba(79, 195, 247, 0.75);
+}
+@keyframes bomberman-charge-pulse {
+  from { filter: brightness(1); }
+  to { filter: brightness(1.6); }
+}
+@keyframes bomberman-charge-stage-2-pulse {
+  from { filter: brightness(1.4); }
+  to { filter: brightness(2); }
+}
+
+.charge-particles {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  pointer-events: none;
+  z-index: 8;
+}
+.charge-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--dist)) rotate(calc(-1 * var(--angle)));
+  animation: charge-particle-converge 0.9s ease-in infinite;
+  animation-delay: var(--delay, 0s);
+  opacity: 0;
+}
+.charge-particle.variant-a {
+  background: radial-gradient(circle, #f2feff 0%, #4fc3f7 55%, rgba(79, 195, 247, 0) 100%);
+  box-shadow: 0 0 6px 2px rgba(79, 195, 247, 0.9);
+}
+.charge-particle.variant-b {
+  background: radial-gradient(circle, #ffffff 0%, #cdeeff 55%, rgba(79, 195, 247, 0) 100%);
+  box-shadow: 0 0 6px 2px rgba(205, 238, 255, 0.9);
+}
+.charge-particle.variant-c {
+  background: radial-gradient(circle, #eaffff 0%, #4fc3f7 55%, rgba(79, 195, 247, 0) 100%);
+  box-shadow: 0 0 6px 2px rgba(79, 195, 247, 0.85);
+}
+.charge-particles.ready .charge-particle { animation-duration: 0.5s; }
+.charge-particles.stage-2 .charge-particle { animation-duration: 0.28s; }
+/* 2段階目: 粒子10個のうち偶数番目(0,2,4,6,8番目=ちょうど半分)をピンクにして、1段階目(青白のみ)と見分けやすくする */
+.charge-particles.stage-2 .charge-particle:nth-child(odd) {
+  background: radial-gradient(circle, #fffafc 0%, #ff94c4 55%, rgba(255, 148, 196, 0) 100%);
+  box-shadow: 0 0 7px 3px rgba(255, 148, 196, 0.9);
+}
+@keyframes charge-particle-converge {
+  0% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--dist)) rotate(calc(-1 * var(--angle))); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0px) rotate(calc(-1 * var(--angle))); opacity: 0; }
+}
+
+.charge-shot {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0%, #4fc3f7 55%, #0d47a1 100%);
+  box-shadow: 0 0 10px 4px rgba(79, 195, 247, 0.9), 0 0 18px 8px rgba(120, 220, 255, 0.5);
+  transform: translate(8px, 8px);
+  z-index: 9;
+}
+.charge-shot-stage-2 {
+  width: 20px;
+  height: 20px;
+  transform: translate(6px, 6px);
+  background: radial-gradient(circle, #ffffff 0%, #e0faff 45%, #4fc3f7 70%, #0d47a1 100%);
+  box-shadow: 0 0 12px 5px rgba(224, 250, 255, 1), 0 0 24px 10px rgba(79, 195, 247, 0.75);
+}
+.explosion-circle.charge-blast {
+  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(224, 250, 255, 0.98) 28%, rgba(79, 195, 247, 0.95) 62%, rgba(13, 71, 161, 0.35) 100%);
+  box-shadow: 0 0 12px 5px rgba(224, 250, 255, 0.95), 0 0 22px 8px rgba(79, 195, 247, 0.65);
+}
+.explosion-circle.charge-blast::after {
+  content: "";
+  position: absolute;
+  inset: 35%;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 10px 4px rgba(224, 250, 255, 0.95);
+}
+.explosion-circle.charge-explosion {
+  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(224, 250, 255, 0.98) 24%, rgba(79, 195, 247, 0.82) 55%, rgba(13, 71, 161, 0) 100%);
+  box-shadow: 0 0 30px 14px rgba(120, 220, 255, 0.8);
+  animation: explode-charge-shockwave 0.75s ease-out forwards;
+  z-index: 7;
+}
+.explosion-circle.charge-explosion-stage-2 {
+  background: radial-gradient(circle, color-mix(in srgb, white 50%, #ffc4dc 50%) 0%, rgba(224, 250, 255, 0.98) 24%, rgba(79, 195, 247, 0.82) 55%, rgba(13, 71, 161, 0) 100%);
+  box-shadow: 0 0 46px 20px rgba(120, 220, 255, 0.9);
+}
+@keyframes explode-charge-shockwave {
+  0% { opacity: 1; transform: scale(0); }
+  55% { opacity: 0.9; transform: scale(0.75); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+/* ---- みそボンのレーザー ---- */
+.misobon-laser {
+  position: absolute;
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 9;
+  background: radial-gradient(circle, #ffffff 0%, #cdeeff 40%, #4fc3f7 75%, rgba(79, 195, 247, 0) 100%);
+  box-shadow: 0 0 8px 3px rgba(79, 195, 247, 0.85), 0 0 16px 6px rgba(79, 195, 247, 0.4);
+}
+.misobon-laser.horizontal {
+  width: 24px;
+  height: 5px;
+  transform: translate(4px, 13.5px);
+}
+.misobon-laser.vertical {
+  width: 5px;
+  height: 24px;
+  transform: translate(13.5px, 4px);
+}
+
+.misobon-aim-marker {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  pointer-events: none;
+  z-index: 20;
+}
+.misobon-aim-marker .corner {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--marker-color, #ff1744);
+  filter: drop-shadow(0 0 3px var(--marker-color, #ff1744));
+}
+.misobon-aim-marker .corner-tl { top: 2px; left: 2px; border-right: none; border-bottom: none; }
+.misobon-aim-marker .corner-tr { top: 2px; right: 2px; border-left: none; border-bottom: none; }
+.misobon-aim-marker .corner-bl { bottom: 2px; left: 2px; border-right: none; border-top: none; }
+.misobon-aim-marker .corner-br { bottom: 2px; right: 2px; border-left: none; border-top: none; }
+
+/* ---- 戦績パネル(通常対戦 / 測定モード) ---- */
+.score-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+  padding: 6px 14px;
+  background: #1b1b1b;
+  border: 1px solid #333;
+  border-radius: 6px;
+  width: 600px;
+  max-width: 96vw;
+  box-sizing: border-box;
+}
+.score-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.score-label {
+  width: 70px;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: bold;
+  color: #ffd700;
+}
+.score-values {
+  flex: 1;
+  font-size: 12px;
+  color: #eee;
+  font-variant-numeric: tabular-nums;
+}
+.score-reset {
+  padding: 3px 10px;
+  font-size: 11px;
+  border: 1px solid #555;
+  border-radius: 4px;
+  background: #222;
+  color: #ccc;
+  cursor: pointer;
+}
+.score-reset:hover {
+  background: #333;
+}
+
+/* ---- 「TOPへ」ボタン(ゲームセット後にフィールド下部へ表示) ---- */
+.btn-top {
+  position: absolute;
+  left: 50%;
+  bottom: 44px;
+  transform: translateX(-50%);
+  z-index: 40;
+  padding: 12px 36px;
+  font-size: 18px;
+  font-weight: bold;
+  border: 2px solid #ffd700;
+  border-radius: 8px;
+  background: #b71c1c;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
+}
+.btn-top:hover {
+  background: #d32f2f;
+}
+.btn-top.hidden { display: none; }
+
+
+/* ---- 制限時間表示 ---- */
+.match-timer {
+  margin: 2px 0 8px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #9ecbff;
+  font-variant-numeric: tabular-nums;
+}
+.match-timer.warning {
+  color: #ff8a80;
+}
+
+/* ===== ここから下は、旧デザイン(BvM_1005-4)に無かった機能のための最小限の追加 ===== */
+/* 100試合測定ボタン */
+.measure-controls { display: flex; align-items: center; gap: 8px; }
+.btn-measure {
+  padding: 3px 12px; font-size: 11px; font-weight: bold; border: 1px solid #ffd700;
+  border-radius: 4px; background: #332b00; color: #ffd700; cursor: pointer;
+}
+.measure-progress { font-size: 11px; color: #00e5ff; }
+
+.btn-top {
+  position: absolute; left: 50%; bottom: 44px; transform: translateX(-50%); z-index: 40;
+  padding: 12px 36px; font-size: 18px; font-weight: bold; border: 2px solid #ffd700;
+  border-radius: 8px; background: #b71c1c; color: #fff; cursor: pointer;
+}
+
+/* 柱(みそボンが入れない壁)は、レンガ模様なしの無地(BvM_RM-FIX4の柱の絵柄)。
+   みそボンが動ける輪郭の壁(レンガ模様)と見分けやすくする */
+.cell.wall.pillar {
+  background-color: #8a8a8a;
+  background-image: none;
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.55), inset 0 0 0 3px rgba(255, 255, 255, 0.07);
+}
+
+/* 柱の損傷(割れた柱は通れる) */
+.cell.wall.pillar-cracked {
+  background: repeating-linear-gradient(135deg, #b0873f, #b0873f 4px, #7a5a26 4px, #7a5a26 8px);
+  box-shadow: inset 0 0 0 2px #5a4014;
+}
+.cell.wall.pillar-broken {
+  background-color: #2f8f2f;
+  background-image: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 8px);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+
+/* みそボンのチャージ(照準中)は、ボンバーマンのチャージと同じ光り方 */
+.misobon.charging {
+  box-shadow: 0 0 10px 6px rgba(79, 195, 247, 0.75);
+  animation: bomberman-charge-pulse 0.55s ease-in-out infinite alternate;
+}
+.misobon.charging.charge-stage-2 {
+  box-shadow: 0 0 14px 8px rgba(129, 230, 255, 0.95), 0 0 26px 12px rgba(79, 195, 247, 0.7);
+  animation: bomberman-charge-stage-2-pulse 0.2s ease-in-out infinite alternate;
+}
+/* みそボンのチャージレーザー: 通常レーザーより少し太く、淡いピンクを混ぜる */
+.misobon-laser.charge-laser {
+  background: radial-gradient(circle, #ffffff 0%, #ffd3e6 45%, #4fc3f7 100%);
+  box-shadow: 0 0 8px 3px rgba(255, 148, 196, 0.8), 0 0 16px 6px rgba(79, 195, 247, 0.4);
+}
+.misobon-laser.charge-laser.horizontal { height: 8px; transform: translate(4px, 12px); }
+.misobon-laser.charge-laser.vertical { width: 8px; transform: translate(12px, 4px); }
+
+/* ===== 試合前のルール選択 ===== */
+.rule-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #ffe9a8;
+}
+.rule-row select {
+  background: #222;
+  color: #eee;
+  border: 1px solid #ffd700;
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 13px;
+}
+.rule-row select:disabled { opacity: 0.6; }
+
+/* 試合中の「中断してTOPへ」(盤面の外。制限時間の下に置き、盤面を隠さない) */
+.btn-abort {
+  margin: 0 0 8px; padding: 3px 12px; font-size: 12px; font-weight: bold;
+  border: 1px solid #ff8a80; border-radius: 4px; background: #3b1212; color: #ff8a80; cursor: pointer;
+}
+.btn-abort:hover { background: #5a1a1a; }
+.btn-abort.hidden { display: none; }
+
+/* ===== みそボンのレーザー クールタイムゲージ(キャラの下) =====
+   待機中(撃てる)=青白く満タン / 撃った直後から再び撃てるまで=橙色が左から溜まる。
+   溜まりきった瞬間に青白いフラッシュ。溜まり具合は js/render.js の setLaserGauge が transition で動かす */
+.misobon .laser-gauge {
+  position: absolute;
+  left: 0;
+  top: 24px;
+  width: 24px;
+  height: 5px;
+  box-sizing: border-box;
+  background: #0b0b0b;
+  border: 1px solid rgba(125, 249, 255, 0.85);
+  border-radius: 2px;
+  overflow: hidden;
+  pointer-events: none;
+  box-shadow: 0 0 4px rgba(125, 249, 255, 0.6);
+}
+.misobon .laser-gauge-fill {
+  width: 100%;
+  height: 100%;
+  transform-origin: left center;
+  background: #7df9ff;
+}
+.misobon.laser-cooling .laser-gauge {
+  border-color: rgba(255, 145, 0, 0.9);
+  box-shadow: none;
+}
+.misobon.laser-cooling .laser-gauge-fill {
+  background: #ff9100;
+}
+.misobon.laser-ready-flash .laser-gauge {
+  animation: laser-ready-flash 0.7s ease-out;
+}
+@keyframes laser-ready-flash {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 1); background: #fff; }
+  35% { transform: scale(1.35, 1.6); box-shadow: 0 0 10px 5px rgba(125, 249, 255, 0.95); background: #fff; }
+  100% { transform: scale(1); box-shadow: 0 0 4px rgba(125, 249, 255, 0.6); background: #0b0b0b; }
+}
+.entity.dead .laser-gauge { display: none; }
+
+/* ---- 自キャラの目印(見た目専用。ゲームの処理には触れない) ---- */
+/* ロスターの操作中カードに「YOU」の札 */
+.slot-card { position: relative; }
+.slot-card.active-control::after {
+  content: "YOU";
+  position: absolute;
+  top: -10px;
+  right: -8px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  padding: 3px 7px;
+  border-radius: 9px;
+  background: #d32f2f;
+  color: #fff;
+  pointer-events: none;
+}
+/* 開始前だけ、選択中のキャラの頭上に上下する赤い矢印。試合が始まる(body.match-live)と消える */
+body:not(.match-live) .entity.selected:not(.dead)::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -22px;
+  margin-left: -8px;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 12px solid #d32f2f;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.6));
+  pointer-events: none;
+  z-index: 20;
+  animation: bvm-you-bob 0.9s ease-in-out infinite;
+}
+@keyframes bvm-you-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* ---- 遊び方「?」(音量パネルの右隣。マウスオーバー/フォーカスで表示) ---- */
+.volume-controls { position: relative; }
+.help-wrap {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 4px;
+}
+.help-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #f3c95c;
+  background: #1d2030;
+  color: #f3c95c;
+  font-size: 18px;
+  font-weight: 800;
+  font-family: inherit;
+  padding: 0;
+  cursor: help;
+}
+.help-btn:hover,
+.help-btn:focus-visible {
+  background: #f3c95c;
+  color: #14161f;
+  outline: none;
+}
+.help-tip {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 44px;
+  z-index: 100;
+  width: min(560px, 92vw);
+  box-sizing: border-box;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #1d2030;
+  border: 1px solid #4a5170;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+  color: #eef0f6;
+  font-size: 12px;
+  text-align: left;
+}
+.help-wrap:hover .help-tip,
+.help-wrap:focus-within .help-tip { display: block; }
+.help-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.help-title { font-size: 15px; font-weight: 800; color: #f3c95c; }
+.help-sub { font-size: 11px; color: #c3c9dc; }
+.help-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.help-card { padding: 10px 12px; border-radius: 10px; background: #252a3e; display: flex; flex-direction: column; gap: 8px; }
+.help-card-title { font-size: 13px; font-weight: 800; color: #fff; }
+.help-card-title span { font-size: 10px; font-weight: 600; color: #c3c9dc; }
+.help-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; color: #e3e6f1; }
+.hk {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: #0f111a;
+  border: 1px solid #4a5170;
+  border-bottom-width: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #f2f4fa;
+  line-height: 1.2;
+}
+.help-note { margin: 0; font-size: 11px; line-height: 1.6; color: #c3c9dc; }
+.help-foot { margin-top: 12px; padding: 9px 12px; border-radius: 10px; background: #252a3e; line-height: 1.7; color: #e3e6f1; }
+.help-foot b { color: #f3c95c; }
+
+/* Public build: hide benchmark controls without removing DOM bindings. */
+.score-row[hidden] { display: none !important; }

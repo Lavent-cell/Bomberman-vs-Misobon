@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bomberman vs Misobon</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="sudden-death-banner" id="sudden-death-banner">サドンデス: 開始前</div>
+
+  <div class="roster-panel" id="roster-panel">
+    <div class="roster-team team-bm">
+      <div class="roster-team-header">
+        <span class="team-badge bm-badge">B</span> ボンバーマン陣営 (最大3人)
+      </div>
+      <div class="slot-list" id="bm-slots"></div>
+    </div>
+    <div class="roster-team team-mb">
+      <div class="roster-team-header">
+        <span class="team-badge mb-badge">M</span> みそボン陣営 (最大5人)
+      </div>
+      <div class="slot-list" id="mb-slots"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <span class="control-hint">※ローカルプレイ: ロスターのカードクリック または [Tab] / [1]〜[8] で操作キャラを変更できます。ネット対戦(サーバー接続中): 1人1キャラ。空いている枠のカードをクリックで移動、枠の設定と開始は部屋の主(最初に入った人)だけができます。枠が埋まっていても観戦で入れます(観戦は10人まで)。「観戦用URLをコピー」のURLで入ると枠に座らず観戦でき、部屋の主が全枠をNPCにすればNPC同士の対戦も見られます</span>
+  </div>
+
+  <div class="volume-controls" id="volume-panel">
+    <p class="volume-hint">※BGM/効果音はGAME START後の音に反映されます</p>
+    <div class="volume-row">
+      <label class="volume-name volume-name-master" for="vol-master">マスター音量</label>
+      <input type="range" id="vol-master" min="0" max="100" value="80" />
+      <span class="volume-value" id="vol-master-label">80</span>
+    </div>
+    <div class="volume-row">
+      <label class="volume-name volume-name-bgm" for="vol-bgm">BGM音量</label>
+      <input type="range" id="vol-bgm" min="0" max="100" value="70" />
+      <span class="volume-value" id="vol-bgm-label">70</span>
+    </div>
+    <div class="volume-row">
+      <label class="volume-name volume-name-sfx" for="vol-sfx">効果音量</label>
+      <input type="range" id="vol-sfx" min="0" max="100" value="80" />
+      <span class="volume-value" id="vol-sfx-label">80</span>
+    </div>
+
+    <!-- 遊び方(マウスを乗せている間/キーボードでフォーカス中だけ表示) -->
+    <div class="help-wrap" id="help-wrap">
+      <button type="button" class="help-btn" id="help-btn" aria-label="遊び方を見る" aria-describedby="help-tip">?</button>
+      <div class="help-tip" id="help-tip" role="tooltip">
+        <div class="help-head">
+          <span class="help-title">遊び方</span>
+          <span class="help-sub">非対称バトル:ボンバーマン陣営 vs みそボン陣営</span>
+        </div>
+        <div class="help-cols">
+          <div class="help-card">
+            <div class="help-card-title">ボンバーマン <span>床を自由に移動</span></div>
+            <div class="help-row"><span class="hk">WASD</span><span class="hk">矢印キー</span><span>歩く</span></div>
+            <div class="help-row"><span class="hk">Space 単押し</span><span>爆弾(同時3個・誘爆あり)</span></div>
+            <div class="help-row"><span class="hk">Space 長押し</span><span>チャージショット</span></div>
+            <p class="help-note">0.8秒:射程3マス / 1.6秒:射程無制限(ピンクの粒子)。外周の壁を壊して、みそボンを落とせ。</p>
+          </div>
+          <div class="help-card">
+            <div class="help-card-title">みそボン <span>外周の壁だけを移動</span></div>
+            <div class="help-row"><span class="hk">WASD</span><span class="hk">矢印キー</span><span>壁づたいに歩く</span></div>
+            <div class="help-row"><span class="hk">Space</span><span>2マスまでジャンプ(CD 2.1秒)</span></div>
+            <div class="help-row"><span class="hk">F / B 単押し</span><span>レーザー</span></div>
+            <div class="help-row"><span class="hk">F / B 長押し</span><span>チャージレーザー</span></div>
+            <p class="help-note">チャージレーザーは柱を貫通する(通った柱は1段階壊れる)。通常のレーザーは柱の手前で止まる。足元の壁が壊れたら即アウト。</p>
+          </div>
+        </div>
+        <div class="help-foot">
+          <div><b>勝ち方</b>　爆風やレーザーを相手に直撃させる / ボンバーマンが、みそボンの立つ壁を壊す</div>
+          <div><b>サドンデス</b>　20秒後から外周が内側へ縮む。</div>
+          <div><b>観戦</b>　枠に座らず見るだけの参加もOK(ロビーの「観戦にまわる」)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="score-panel" id="score-panel">
+    <div class="score-row">
+      <span class="score-label">通常対戦</span>
+      <span class="score-values" id="score-normal"></span>
+      <button type="button" class="score-reset" id="btn-reset-normal">戦績リセット</button>
+    </div>
+    <div class="score-row" hidden aria-hidden="true">
+      <span class="score-label">測定モード</span>
+      <span class="score-values" id="score-measure"></span>
+      <div class="measure-controls">
+        <button type="button" class="btn-measure" id="btn-measure-start">100試合測定</button>
+        <span class="measure-progress" id="measure-progress"></span>
+        <button type="button" class="score-reset" id="btn-reset-measure">戦績リセット</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="status" id="status"></div>
+  <div class="match-timer" id="match-timer">制限時間 2:30</div>
+  <button type="button" class="btn-abort hidden" id="btn-abort">中断してTOPへ</button>
+
+  <div class="field" id="field">
+    <div class="start-overlay" id="start-overlay">
+      <div class="start-panel">
+        <label class="rule-row">サドンデスの停止段階:
+          <select id="sel-sd-stage">
+            <option value="2">2段で止める(時間切れは引き分け)</option>
+            <option value="4">4段で止める(時間切れは引き分け)</option>
+          </select>
+        </label>
+        <button id="btn-game-start">GAME START(BGMあり)</button>
+        <p id="loading-msg" class="hidden"></p>
+      </div>
+    </div>
+    <div class="countdown hidden" id="countdown"></div>
+    <button type="button" class="btn-top hidden" id="btn-top">TOPへ</button>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
