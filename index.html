@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Bomberman vs Misobon</title>
   <link rel="icon" href="data:," />
   <link rel="stylesheet" href="style.css" />
@@ -120,6 +120,20 @@
     <button type="button" class="btn-top hidden" id="btn-top">TOPへ</button>
   </div>
 
+  <div id="touch-controls" class="touch-controls" aria-label="スマートフォン操作">
+    <div id="touch-pad" class="touch-pad" role="button" aria-label="移動スティック">
+      <span id="touch-pad-nub" class="touch-pad-nub"></span>
+      <span class="touch-pad-caption">移動</span>
+    </div>
+    <div class="touch-right-controls">
+      <button type="button" id="touch-jump" class="touch-jump" aria-label="ジャンプ" hidden>ジャンプ</button>
+      <button type="button" id="touch-attack" class="touch-attack" aria-label="爆弾・レーザー">
+        <span class="touch-attack-label">爆弾</span>
+        <span class="touch-attack-hint">長押し + スライド</span>
+      </button>
+    </div>
+  </div>
+  <div class="touch-rotate-hint" aria-hidden="true">📱 横画面にしてプレイしてください</div>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>
