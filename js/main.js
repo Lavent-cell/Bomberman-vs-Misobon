@@ -2,6 +2,7 @@
 import { buildGrid } from "./dom.js";
 import { renderAll } from "./render.js";
 import { setupInput } from "./input.js";
+import { setupTouchControls } from "./touchControls.js";
 import { setupGameStart } from "./gameStart.js";
 import { setupVolumeControls } from "./volume.js";
 import { setupMovementLoop } from "./movementLoop.js";
@@ -14,6 +15,7 @@ renderAll();
 
 setupViewEvents();
 setupInput();
+setupTouchControls();
 setupGameStart();
 setupVolumeControls();
 setupMovementLoop();
