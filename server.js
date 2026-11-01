@@ -53,7 +53,18 @@ const server = http.createServer((req, res) => {
 const MAX_SPECTATORS = process.env.MAX_SPECTATORS !== undefined ? Number(process.env.MAX_SPECTATORS) : 10;
 
 const room = createRoom({ roomCode: ROOM_CODE, countdownSec: COUNTDOWN_SEC, maxSpectators: MAX_SPECTATORS, log: (m) => console.log(`[部屋 ${ROOM_CODE}] ${m}`) });
-const wss = new WebSocketServer({ server, maxPayload: 4096 });
+const wss = new WebSocketServer({
+  server,
+  maxPayload: 4096,
+  verifyClient: ({ req, origin }) => {
+    // Reject cross-origin browser WebSocket connections.
+    if (!origin) return true; // Retain compatibility with non-browser clients.
+    try {
+      const url = new URL(origin);
+      return (url.protocol === "https:" || url.protocol === "http:") && url.host === req.headers.host;
+    } catch (_) { return false; }
+  }
+});
 
 wss.on("connection", (ws, req) => {
   const url = new URL(req.url, "http://localhost");
