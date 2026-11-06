@@ -48,7 +48,7 @@ function selectCharacterByNumber(num) {
 }
 
 // ネット対戦中(game.mirror)は、入力をサーバーに送るだけ。ローカルのロジックには渡さない。
-function sendAction(charKeyId, action, params = {}) {
+export function sendAction(charKeyId, action, params = {}) {
   if (game.mirror) {
     if (netClient.isSpectator()) return; // 観戦者は操作しない
     if (netClient.isConnected()) netClient.sendAction(charKeyId, action, params);
@@ -67,6 +67,25 @@ function syncHeldDirection(char) {
   sendAction(char.keyId, "HOLD_DIR", { dx: currentDirection.dx, dy: currentDirection.dy });
 }
 
+const TOUCH_KEY="__touch_joystick__";
+let touchLast={dx:0,dy:0},touchOwner=null;
+export function setTouchDirection(char,dir){
+  if(!char||!char.alive||char.mode!=="player"||!game.gameStarted||game.over)return;
+  if(dir.dx===touchLast.dx&&dir.dy===touchLast.dy&&char.keyId===touchOwner)return;
+  touchOwner=char.keyId;touchLast={dx:dir.dx,dy:dir.dy};
+  if(dir.dx||dir.dy)pushOrUpdateDirectionKey(TOUCH_KEY,dir);
+  else removeDirectionKey(TOUCH_KEY);
+  if(game.mirror)syncHeldDirection(char);
+}
+export function releaseTouchDirection(){
+  const owner=touchOwner;
+  touchOwner=null;touchLast={dx:0,dy:0};
+  removeDirectionKey(TOUCH_KEY);
+  if(game.mirror&&owner){
+    sendAction(owner,"HOLD_DIR",{dx:0,dy:0});
+    lastSentHold="0,0";
+  }
+}
 export function setupInput() {
   window.addEventListener("keydown", (e) => {
     if (!game.gameStarted || game.over) return;
