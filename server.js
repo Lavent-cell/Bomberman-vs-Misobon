@@ -67,17 +67,29 @@ const wss = new WebSocketServer({
 });
 
 wss.on("connection", (ws, req) => {
-  const url = new URL(req.url, "http://localhost");
-  const accepted = room.handleConnection(ws, {
-    token: url.searchParams.get("token"),
-    version: url.searchParams.get("v"),
-    room: url.searchParams.get("room") || ROOM_CODE,
-    spectate: url.searchParams.get("spectate") === "1"
-  });
-  if (!accepted) return;
-  ws.on("message", (raw) => room.handleMessage(ws, raw.toString()));
-  ws.on("close", () => room.leave(ws));
   ws.on("error", () => {});
+  try {
+    const url = new URL(req.url, "http://localhost");
+    const accepted = room.handleConnection(ws, {
+      token: url.searchParams.get("token"),
+      version: url.searchParams.get("v"),
+      room: url.searchParams.get("room") || ROOM_CODE,
+      spectate: url.searchParams.get("spectate") === "1"
+    });
+    if (!accepted) return;
+    ws.on("message", (raw) => {
+      try {
+        room.handleMessage(ws, raw.toString());
+      } catch (error) {
+        console.error("[WebSocket] Message handling failed:", error);
+        ws.terminate();
+      }
+    });
+    ws.on("close", () => room.leave(ws));
+  } catch (error) {
+    console.error("[WebSocket] Connection handling failed:", error);
+    ws.terminate();
+  }
 });
 
 server.listen(PORT, () => {
