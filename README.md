@@ -67,3 +67,8 @@ Tests: `npm test`
 - **Sound effect**: *boss激光炮射击* — [Pixabay](https://pixabay.com/sound-effects/film-special-effects-boss%E6%BF%80%E5%85%89%E7%82%AE%E5%B0%84%E5%87%BB-572015/)
 
 Third-party assets remain subject to their respective licenses. Inclusion in this project does not transfer ownership of those assets.
+
+---
+
+<sub>この制作物はAIを活用して制作されました。  
+This project was created with the assistance of AI.</sub>
