@@ -72,3 +72,10 @@ Third-party assets remain subject to their respective licenses. Inclusion in thi
 
 <sub>この制作物はAIを活用して制作されました。  
 This project was created with the assistance of AI.</sub>
+
+## スマホ操作（横画面） / Mobile touch controls
+- ゲーム中は左下スティックで移動、右下ボタンで爆弾・レーザーを操作します。みそボン専用のジャンプボタンもあります。
+- ボンバーマン：攻撃タップで爆弾、長押しでチャージ。押した指をスライドして射撃方向を選択。
+- みそボン：攻撃タップでレーザー、長押しでチャージ。照準軸に沿ってスライドして照準距離を調整。
+- ロビー・観戦中はゲーム操作を非表示にします。PCの操作方法は従来どおり。
+- The touch controller uses existing server-validated actions; no new networking message is introduced.
