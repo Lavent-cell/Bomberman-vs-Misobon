@@ -32,13 +32,15 @@ export function createRoom(options = {}) {
 }
 
 class GameRoom {
-  constructor({ roomCode = "main", countdownSec = 3, reserveMs = 120000, snapshotMs = 50, seed = null, maxSpectators = DEFAULT_MAX_SPECTATORS, log = () => {} } = {}) {
+  constructor({ roomCode = "main", countdownSec = 3, reserveMs = 120000, snapshotMs = 50, seed = null, maxSpectators = DEFAULT_MAX_SPECTATORS, hostIdleMs = 600000, log = () => {} } = {}) {
     this.roomCode = roomCode;
     this.countdownSec = countdownSec;
     this.reserveMs = reserveMs;
     this.snapshotMs = snapshotMs;
     this.seed = seed;
     this.maxSpectators = maxSpectators;
+    this.hostIdleMs = hostIdleMs;
+    this.hostActivityAt = Date.now();
     this.log = log;
 
     this.clients = new Map();   // conn -> { token, windowStart, windowCount }
@@ -126,6 +128,7 @@ class GameRoom {
   electHost() {
     const connected = [...this.sessions.entries()].filter(([, s]) => s.connected).sort((a, b) => a[1].joinedAt - b[1].joinedAt);
     this.hostToken = connected.length ? connected[0][0] : null;
+    this.hostActivityAt = Date.now();
   }
 
   rosterMessage() {
@@ -285,6 +288,10 @@ class GameRoom {
     if (!session) return;
     const isHost = this.hostToken === info.token;
     const lobbyLike = this.phase === "lobby" || this.phase === "over";
+    // PING is automatic and does not count as human activity.
+    if (isHost && ["INPUT", "SET_SLOT", "SPECTATE", "SET_RULE", "CHOOSE_SLOT", "RETURN_TO_LOBBY", "START"].includes(msg.type)) {
+      this.hostActivityAt = Date.now();
+    }
 
     switch (msg.type) {
       case "INPUT": {
@@ -437,6 +444,18 @@ class GameRoom {
     if (!this._lastExpire || now - this._lastExpire >= 1000) {
       this._lastExpire = now;
       this.expireReservations();
+      // Transfer authority after host inactivity without disconnecting players or resetting a match.
+      if (this.hostToken && now - this.hostActivityAt >= this.hostIdleMs) {
+        const next = [...this.sessions.entries()]
+          .filter(([token, session]) => session.connected && token !== this.hostToken)
+          .sort((a, b) => a[1].joinedAt - b[1].joinedAt)[0];
+        if (next) {
+          this.hostToken = next[0];
+          this.hostActivityAt = now;
+          this.broadcastRoster();
+          this.log(`ホスト権限を自動移譲: ${next[1].playerId}`);
+        }
+      }
       // 誰もいなくなった試合は片付けて、次の人のためにロビーへ戻す
       if (this.phase !== "lobby" && this.clients.size === 0 && this.sessions.size === 0) this.toLobby();
     }

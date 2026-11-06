@@ -24,12 +24,12 @@ function getOrCreateSessionToken() {
   try {
     let tok = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!tok) {
-      tok = "tok_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 9);
+      tok = "tok_" + Array.from(crypto.getRandomValues(new Uint8Array(24)), b => b.toString(16).padStart(2, "0")).join("");
       sessionStorage.setItem(SESSION_STORAGE_KEY, tok);
     }
     return tok;
   } catch (e) {
-    return "tok_fallback_" + Math.random().toString(36).substring(2, 10);
+    return "tok_" + Array.from(crypto.getRandomValues(new Uint8Array(24)), b => b.toString(16).padStart(2, "0")).join("");
   }
 }
 
@@ -395,7 +395,7 @@ class NetClient {
     inviteBar.id = "net-invite-bar";
     inviteBar.style.cssText = "display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:8px; font-size:12px; color:#ffd700;";
     inviteBar.innerHTML = `
-      <span id="room-status-text">部屋: [${this.roomId}]</span>
+      <span id="room-status-text"></span>
       <button type="button" id="btn-enable-audio" style="padding:3px 10px; font-size:11px; background:#245d36; color:#fff; border:1px solid #79c894; border-radius:4px; cursor:pointer;">🔊 音声を有効にする</button>
       <button type="button" id="btn-copy-invite" style="padding:3px 10px; font-size:11px; background:#333; color:#eee; border:1px solid #666; border-radius:4px; cursor:pointer;">招待URLをコピー</button>
       <button type="button" id="btn-copy-spectate" style="padding:3px 10px; font-size:11px; background:#333; color:#eee; border:1px solid #666; border-radius:4px; cursor:pointer;">観戦用URLをコピー</button>
@@ -413,6 +413,7 @@ class NetClient {
       </label>
       <span id="net-toast" style="color:#ff8a80; font-size:11px;"></span>
     `;
+    inviteBar.querySelector("#room-status-text").textContent = `部屋: [${this.roomId}]`;
     document.body.insertBefore(inviteBar, document.body.firstChild);
 
     // 操作に関わるボタンは設定パネル内へ移動。既存のIDとイベント処理は維持する。
