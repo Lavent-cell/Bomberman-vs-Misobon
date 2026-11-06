@@ -77,5 +77,7 @@ Third-party assets remain subject to their respective licenses. Inclusion in thi
 - ロビー・観戦中はゲーム操作を非表示にします。PCの操作方法は従来どおり。
 - The touch controller uses existing server-validated actions; no new networking message is introduced.
 
+---
+
 <sub>この制作物はAIを活用して制作されました。  
 This project was created with the assistance of AI.</sub>
